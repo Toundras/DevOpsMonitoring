@@ -1,0 +1,39 @@
+version: '3.4'
+services:
+  fluentd:
+    build: ./fluentd
+    volumes:
+      - ./fluentd/conf:/fluentd/etc
+    links:
+      - "elasticsearch"
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    networks: 
+            default:
+            sf_monitoring:
+                aliases: [fluentd]
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.5.0
+    container_name: elasticsearch
+    environment:
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    expose:
+      - 9200
+    ports:
+      - "9200:9200"
+    networks:
+      default:
+      sf_monitoring:
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:6.5.0
+    links:
+      - "elasticsearch"
+    ports:
+      - "5601:5601"
+      
+networks:
+    sf_monitoring:
+        external: true
